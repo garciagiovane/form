@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: "form-application"
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/${POSTGRES_DB}"
+    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER}
+    driver-class-name: "org.postgresql.Driver"
+  jpa:
+    generate-ddl: true
+
+server:
+  error:
+    include-message: "always"
