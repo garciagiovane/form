@@ -28,12 +28,12 @@ public class UserModelStub {
                 .build();
     }
 
-    public static UserModel withImage() {
+    public static UserModel withImage(String imageName) {
         return UserModel.builder()
                 .image(new byte[]{99, 111, 110, 116, 101, 110, 116})
                 .name("Tester")
                 .birthDate(LocalDate.of(2022, 3, 14))
-                .imageName("")
+                .imageName(imageName)
                 .id(null)
                 .build();
     }

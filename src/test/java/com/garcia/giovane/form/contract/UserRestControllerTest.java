@@ -3,10 +3,13 @@ package com.garcia.giovane.form.contract;
 import com.garcia.giovane.form.impl.UserService;
 import com.garcia.giovane.form.impl.stub.UserModelStub;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,8 +49,10 @@ class UserRestControllerTest {
     }
 
     @Test
-    void shouldReturn200WhenBodyIsWellFormed() throws Exception {
-        final var file = new MockMultipartFile("image", "content".getBytes(StandardCharsets.UTF_8));
+    void shouldReturn422WhenImageExtensionIsNotAllowed() throws Exception {
+        final var file = new MockMultipartFile(
+                "image", "image.json", MediaType.APPLICATION_JSON_VALUE, "content".getBytes(StandardCharsets.UTF_8)
+        );
         final var request = MockMvcRequestBuilders
                 .multipart("/users")
                 .part(
@@ -56,7 +61,24 @@ class UserRestControllerTest {
                 )
                 .file(file);
 
-        final var user = UserModelStub.withImage();
+        mockMvc.perform(request)
+                .andExpect(MockMvcResultMatchers.status().is(422));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {".png", ".jpg", ".jpeg", ""})
+    void shouldReturn200WhenBodyIsWellFormed(String extension) throws Exception {
+        final var originalFilename = extension.isEmpty() ? "" : "image".concat(extension);
+        final var file = new MockMultipartFile("image", originalFilename, "application/json", "content".getBytes(StandardCharsets.UTF_8));
+        final var request = MockMvcRequestBuilders
+                .multipart("/users")
+                .part(
+                        new MockPart("birthDate", "2022-03-14".getBytes(StandardCharsets.UTF_8)),
+                        new MockPart("name", "Tester".getBytes(StandardCharsets.UTF_8))
+                )
+                .file(file);
+
+        final var user = UserModelStub.withImage(originalFilename);
         Mockito.when(userService.save(user)).thenReturn(user);
 
         final var json = """
@@ -64,12 +86,16 @@ class UserRestControllerTest {
                     "name": "Tester",
                     "birthDate": "2022-03-14",
                     "id": null,
-                    "imageName": ""
+                    "imageName": "${imageName}"
                 }
-                """;
+                """.replace("${imageName}", originalFilename);
 
-        mockMvc.perform(request)
+        final var contentAsString = mockMvc.perform(request)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.content().json(json));
+                .andExpect(MockMvcResultMatchers.content().json(json))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        System.out.println(contentAsString);
     }
 }
