@@ -15,8 +15,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.nio.charset.StandardCharsets;
 
-@WebMvcTest(controllers = FormRestController.class)
-class FormRestControllerTest {
+@WebMvcTest(controllers = UserRestController.class)
+class UserRestControllerTest {
     @MockBean
     UserService userService;
     @Autowired
