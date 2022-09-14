@@ -1,6 +1,8 @@
 # form
 cadastro usuario
 
+### [Swagger](localhost:8080/swagger-ui/index.html)
+
 ### Requisitos para rodar o projeto
 - Java 17
 - Gradle
@@ -38,7 +40,7 @@ curl --location --request POST 'localhost:8080/users' \
 ```
 
 **Atributos opcionais**
-- image
+- image (extensões aceitáveis para o arquivo são `png`, `jpg`, `jpeg`, ` `)
 - birthDate (deve estar no formato iso de data `yyyy-MM-dd`)
 
 ### Exemplo de response
